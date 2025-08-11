@@ -31,6 +31,9 @@ include { SAMTOOLS_QUANT_CONTAMINANTS as QUANT_RRNA
 
 include { FILTER_STATS } from '../../modules/local/filter_stats'
 
+include { SUMMARIZE_QUANT_CONTAMINATION as SUMMARIZE_TRNA
+} from '../../modules/local/summarize_contamination_quant'
+
 workflow CONTAMINANT_FILTER {
     take:
     mirna
@@ -47,6 +50,7 @@ workflow CONTAMINANT_FILTER {
     ch_versions = Channel.empty()
     ch_filter_stats = Channel.empty()
     ch_mqc_results = Channel.empty()
+    ch_contaminants_trna = Channel.empty()
 
     rrna_reads = reads
 
@@ -61,7 +65,7 @@ workflow CONTAMINANT_FILTER {
         ch_filter_stats = ch_filter_stats.mix(MAP_RRNA.out.stats.ifEmpty(null))
         MAP_RRNA.out.unmapped.set { rrna_reads }
         QUANT_RRNA( MAP_RRNA.out.contaminants )
-        
+        // ch_contaminants = ch_contaminants.mix(MAP_RRNA.out.contaminants)
     }
 
     rrna_reads.set { trna_reads }
@@ -75,6 +79,7 @@ workflow CONTAMINANT_FILTER {
         ch_filter_stats = ch_filter_stats.mix(MAP_TRNA.out.stats.ifEmpty(null))
         MAP_TRNA.out.unmapped.set { trna_reads }
         QUANT_TRNA( MAP_TRNA.out.contaminants )
+        ch_contaminants_trna = ch_contaminants_trna.mix(QUANT_TRNA.out.contaminants_path.ifEmpty(null))
     }
 
     trna_reads.set { cdna_reads }
@@ -135,6 +140,8 @@ workflow CONTAMINANT_FILTER {
     }
 
     FILTER_STATS ( other_cont_reads, ch_filter_stats.collect() )
+
+    SUMMARIZE_TRNA ('tRNA', ch_contaminants_trna.collect() )
 
     emit:
     filtered_reads = FILTER_STATS.out.reads
