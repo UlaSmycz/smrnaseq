@@ -14,6 +14,7 @@ process BOWTIE_MAP_CONTAMINANTS {
     output:
     tuple val(meta), path("*sam")                               , emit: bam
     tuple val(meta), path('*.filter.unmapped.contaminant.fastq'), emit: unmapped
+    tuple val(meta), val(contaminant_type), path('*.filter.contaminant.sam'), emit: contaminants
     path "versions.yml"                                         , emit: versions
     path "filtered.*.stats"                                     , emit: stats
 
@@ -32,7 +33,7 @@ process BOWTIE_MAP_CONTAMINANTS {
         --un ${meta.id}.${contaminant_type}.filter.unmapped.contaminant.fastq \\
         --very-sensitive-local \\
         -k 1 \\
-        -S ${meta.id}.filter.contaminant.sam \\
+        -S ${meta.id}.${contaminant_type}.filter.contaminant.sam \\
         ${args} \\
         > ${meta.id}.contaminant_bowtie.log 2>&1
 

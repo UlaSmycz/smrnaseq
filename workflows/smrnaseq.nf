@@ -14,6 +14,7 @@ include { MIRNA_QUANT                      } from '../subworkflows/local/mirna_q
 include { MIRDEEP2                         } from '../subworkflows/local/mirdeep2'
 include { MIRTRACE                         } from '../subworkflows/local/mirtrace'
 include { MULTIQC                          } from '../modules/nf-core/multiqc/main'
+include { SAMTOOLS_QUANT_CONTAMINANTS      } from '../modules/local/samtools_quant'
 include { UMICOLLAPSE as UMICOLLAPSE_FASTQ } from '../modules/nf-core/umicollapse/main'
 include { UMITOOLS_EXTRACT                 } from '../modules/nf-core/umitools/extract/main'
 include { UNTARFILES as UNTAR_BOWTIE_INDEX } from '../modules/nf-core/untarfiles'

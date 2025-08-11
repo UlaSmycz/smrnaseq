@@ -21,6 +21,14 @@ include { BOWTIE_MAP_CONTAMINANTS as MAP_RRNA
         BOWTIE_MAP_CONTAMINANTS as MAP_PIRNA
         BOWTIE_MAP_CONTAMINANTS as MAP_OTHER } from '../../modules/local/bowtie_map_contaminants'
 
+include { SAMTOOLS_QUANT_CONTAMINANTS as QUANT_RRNA
+          SAMTOOLS_QUANT_CONTAMINANTS as QUANT_TRNA
+          SAMTOOLS_QUANT_CONTAMINANTS as QUANT_CDNA
+          SAMTOOLS_QUANT_CONTAMINANTS as QUANT_NCRNA
+          SAMTOOLS_QUANT_CONTAMINANTS as QUANT_PIRNA
+          SAMTOOLS_QUANT_CONTAMINANTS as QUANT_OTHER
+} from '../../modules/local/samtools_quant'
+
 include { FILTER_STATS } from '../../modules/local/filter_stats'
 
 workflow CONTAMINANT_FILTER {
@@ -52,6 +60,8 @@ workflow CONTAMINANT_FILTER {
         ch_versions = ch_versions.mix(MAP_RRNA.out.versions)
         ch_filter_stats = ch_filter_stats.mix(MAP_RRNA.out.stats.ifEmpty(null))
         MAP_RRNA.out.unmapped.set { rrna_reads }
+        QUANT_RRNA( MAP_RRNA.out.contaminants )
+        
     }
 
     rrna_reads.set { trna_reads }
@@ -64,6 +74,7 @@ workflow CONTAMINANT_FILTER {
         ch_versions = ch_versions.mix(MAP_TRNA.out.versions)
         ch_filter_stats = ch_filter_stats.mix(MAP_TRNA.out.stats.ifEmpty(null))
         MAP_TRNA.out.unmapped.set { trna_reads }
+        QUANT_TRNA( MAP_TRNA.out.contaminants )
     }
 
     trna_reads.set { cdna_reads }
@@ -78,6 +89,7 @@ workflow CONTAMINANT_FILTER {
         ch_versions = ch_versions.mix(MAP_CDNA.out.versions)
         ch_filter_stats = ch_filter_stats.mix(MAP_CDNA.out.stats.ifEmpty(null))
         MAP_CDNA.out.unmapped.set { cdna_reads }
+        QUANT_CDNA( MAP_CDNA.out.contaminants )
     }
 
     cdna_reads.set { ncrna_reads }
@@ -91,6 +103,7 @@ workflow CONTAMINANT_FILTER {
         ch_versions = ch_versions.mix(MAP_NCRNA.out.versions)
         ch_filter_stats = ch_filter_stats.mix(MAP_NCRNA.out.stats.ifEmpty(null))
         MAP_NCRNA.out.unmapped.set { ncrna_reads }
+        QUANT_NCRNA( MAP_NCRNA.out.contaminants )
     }
 
     ncrna_reads.set { pirna_reads }
@@ -104,6 +117,7 @@ workflow CONTAMINANT_FILTER {
         ch_versions = ch_versions.mix(MAP_PIRNA.out.versions)
         ch_filter_stats = ch_filter_stats.mix(MAP_PIRNA.out.stats.ifEmpty(null))
         MAP_PIRNA.out.unmapped.set { pirna_reads }
+        QUANT_PIRNA( MAP_PIRNA.out.contaminants )
     }
 
     pirna_reads.set { other_cont_reads }
@@ -117,6 +131,7 @@ workflow CONTAMINANT_FILTER {
         ch_versions = ch_versions.mix(MAP_OTHER.out.versions)
         ch_filter_stats = ch_filter_stats.mix(MAP_OTHER.out.stats.ifEmpty(null))
         MAP_OTHER.out.unmapped.set { other_cont_reads }
+        QUANT_OTHER( MAP_OTHER.out.contaminants )
     }
 
     FILTER_STATS ( other_cont_reads, ch_filter_stats.collect() )
