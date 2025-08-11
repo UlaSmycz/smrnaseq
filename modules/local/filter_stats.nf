@@ -28,9 +28,5 @@ process FILTER_STATS {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        cat:  \$(cat --version | grep 'cat ' |sed 's/cat (GNU coreutils) //')
-        gzip: \$(gzip --version | grep "gzip" | sed 's/gzip //')
-        tr:  \$(tr --version | grep 'tr ' |sed 's/tr (GNU coreutils) //')
-    END_VERSIONS
     """
 }
