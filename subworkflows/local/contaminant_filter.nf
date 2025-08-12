@@ -79,7 +79,7 @@ workflow CONTAMINANT_FILTER {
         ch_filter_stats = ch_filter_stats.mix(MAP_TRNA.out.stats.ifEmpty(null))
         MAP_TRNA.out.unmapped.set { trna_reads }
         QUANT_TRNA( MAP_TRNA.out.contaminants )
-        ch_contaminants_trna = ch_contaminants_trna.mix(QUANT_TRNA.out.contaminants_path.ifEmpty(null))
+        ch_contaminants_trna = ch_contaminants_trna.mix(QUANT_TRNA.out.contaminants_counts)
     }
 
     trna_reads.set { cdna_reads }
@@ -141,7 +141,9 @@ workflow CONTAMINANT_FILTER {
 
     FILTER_STATS ( other_cont_reads, ch_filter_stats.collect() )
 
-    SUMMARIZE_TRNA ('tRNA', ch_contaminants_trna.collect() )
+    if (params.trna) {
+        SUMMARIZE_TRNA ('tRNA', ch_contaminants_trna.collect(), params.trna_annots )
+    }
 
     emit:
     filtered_reads = FILTER_STATS.out.reads

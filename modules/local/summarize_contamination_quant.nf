@@ -8,14 +8,19 @@ process SUMMARIZE_QUANT_CONTAMINATION {
 
     input:
     val contaminant_type
-    path input_files
+    val(contaminants_counts)
+    val(annots_file)
 
     output:
-    path '*.txt'
+    path '*.csv'
     
-
     script:
     """
-    summarize_contamination.py --contaminant_type $contaminant_type --files $input_files 
+    python3 - << 'EOF'
+    import sys
+    sys.path.append('${projectDir}/bin')
+    from summarize_contamination import *
+    generate_summary_file("${contaminant_type}", "${contaminants_counts.join('*@|@*')}", "${annots_file}")
+    EOF
     """
 }

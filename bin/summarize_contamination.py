@@ -1,17 +1,30 @@
 #!/usr/bin/env python3
 
-import sys
-import argparse
+import pandas as pd
 
-parser = argparse.ArgumentParser()
-parser.add_argument('--contaminant_type')
-parser.add_argument('--files',  nargs='+')
+def generate_summary_file(contaminant_type, contaminants_samples, annots_file):
+    with open('temp.txt', 'w') as f:
+        f.write('annots: ' + annots_file)
+     
+    contaminants_samples = contaminants_samples.split('*@|@*')
+    sample_names = contaminants_samples[::2]
+    input_files = contaminants_samples[1::2]
 
-args = parser.parse_args()
+    counts = pd.DataFrame()
+    
 
-contaminant_type = args.contaminant_type
-input_files = args.files
+    ii = 0
+    for sample_name, fname in zip(sample_names, input_files):
+        current_counts = pd.read_csv(fname, delimiter='\t', index_col=0, header=None)
+        if ii==0:
+            counts.index = current_counts.index
+        counts[sample_name] = current_counts[2]
+        ii+=1
 
-with open('contam_files.txt', 'w') as f:
-    for el in input_files:
-        f.write(el+'\n')
+    counts.index.rename('ID', inplace=True)
+
+    if (annots_file):
+        annots = pd.read_csv(annots_file, index_col=0)
+        counts = annots.join(counts)
+
+    counts.to_csv(contaminant_type+'_counts.csv')
