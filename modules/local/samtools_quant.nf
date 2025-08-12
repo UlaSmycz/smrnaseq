@@ -16,9 +16,9 @@ process SAMTOOLS_QUANT_CONTAMINANTS {
     """
     samtools view -b -F 4 ${contaminants}  > ${meta.id}.${contaminant_type}.filter.contaminant.mapped.bam
 
-    samtools sort ${meta.id}.${contaminant_type}.filter.contaminant.mapped.bam -@ 16 -O BAM > ${meta.id}.${contaminant_type}.filter.contaminant.mapped.sorted.bam
+    samtools sort ${meta.id}.${contaminant_type}.filter.contaminant.mapped.bam -@ ${params.max_cpus} -O BAM > ${meta.id}.${contaminant_type}.filter.contaminant.mapped.sorted.bam
 
-    samtools index -@ 16 ${meta.id}.${contaminant_type}.filter.contaminant.mapped.sorted.bam
+    samtools index -@ ${params.max_cpus} ${meta.id}.${contaminant_type}.filter.contaminant.mapped.sorted.bam
 
     samtools idxstats ${meta.id}.${contaminant_type}.filter.contaminant.mapped.sorted.bam > ${meta.id}.${contaminant_type}.tsv
     """

@@ -25,6 +25,6 @@ def generate_summary_file(contaminant_type, contaminants_samples, annots_file):
 
     if (annots_file):
         annots = pd.read_csv(annots_file, index_col=0)
-        counts = annots.join(counts)
+        counts = annots.join(counts, how='outer')
 
     counts.to_csv(contaminant_type+'_counts.csv')

@@ -31,7 +31,12 @@ include { SAMTOOLS_QUANT_CONTAMINANTS as QUANT_RRNA
 
 include { FILTER_STATS } from '../../modules/local/filter_stats'
 
-include { SUMMARIZE_QUANT_CONTAMINATION as SUMMARIZE_TRNA
+include { SUMMARIZE_QUANT_CONTAMINATION as SUMMARIZE_RRNA
+          SUMMARIZE_QUANT_CONTAMINATION as SUMMARIZE_TRNA
+          SUMMARIZE_QUANT_CONTAMINATION as SUMMARIZE_CDNA
+          SUMMARIZE_QUANT_CONTAMINATION as SUMMARIZE_NCRNA
+          SUMMARIZE_QUANT_CONTAMINATION as SUMMARIZE_PIRNA
+          SUMMARIZE_QUANT_CONTAMINATION as SUMMARIZE_OTHER
 } from '../../modules/local/summarize_contamination_quant'
 
 workflow CONTAMINANT_FILTER {
@@ -50,7 +55,12 @@ workflow CONTAMINANT_FILTER {
     ch_versions = Channel.empty()
     ch_filter_stats = Channel.empty()
     ch_mqc_results = Channel.empty()
+    ch_contaminants_rrna = Channel.empty()
     ch_contaminants_trna = Channel.empty()
+    ch_contaminants_cdna = Channel.empty()
+    ch_contaminants_ncrna = Channel.empty()
+    ch_contaminants_pirna = Channel.empty()
+    ch_contaminants_other = Channel.empty()
 
     rrna_reads = reads
 
@@ -65,7 +75,7 @@ workflow CONTAMINANT_FILTER {
         ch_filter_stats = ch_filter_stats.mix(MAP_RRNA.out.stats.ifEmpty(null))
         MAP_RRNA.out.unmapped.set { rrna_reads }
         QUANT_RRNA( MAP_RRNA.out.contaminants )
-        // ch_contaminants = ch_contaminants.mix(MAP_RRNA.out.contaminants)
+        ch_contaminants_rrna = ch_contaminants_rrna.mix(QUANT_RRNA.out.contaminants_counts)
     }
 
     rrna_reads.set { trna_reads }
@@ -95,6 +105,7 @@ workflow CONTAMINANT_FILTER {
         ch_filter_stats = ch_filter_stats.mix(MAP_CDNA.out.stats.ifEmpty(null))
         MAP_CDNA.out.unmapped.set { cdna_reads }
         QUANT_CDNA( MAP_CDNA.out.contaminants )
+        ch_contaminants_cdna = ch_contaminants_cdna.mix(QUANT_CDNA.out.contaminants_counts)
     }
 
     cdna_reads.set { ncrna_reads }
@@ -109,6 +120,7 @@ workflow CONTAMINANT_FILTER {
         ch_filter_stats = ch_filter_stats.mix(MAP_NCRNA.out.stats.ifEmpty(null))
         MAP_NCRNA.out.unmapped.set { ncrna_reads }
         QUANT_NCRNA( MAP_NCRNA.out.contaminants )
+        ch_contaminants_ncrna = ch_contaminants_ncrna.mix(QUANT_NCRNA.out.contaminants_counts)
     }
 
     ncrna_reads.set { pirna_reads }
@@ -123,6 +135,7 @@ workflow CONTAMINANT_FILTER {
         ch_filter_stats = ch_filter_stats.mix(MAP_PIRNA.out.stats.ifEmpty(null))
         MAP_PIRNA.out.unmapped.set { pirna_reads }
         QUANT_PIRNA( MAP_PIRNA.out.contaminants )
+        ch_contaminants_pirna = ch_contaminants_pirna.mix(QUANT_PIRNA.out.contaminants_counts)
     }
 
     pirna_reads.set { other_cont_reads }
@@ -137,12 +150,33 @@ workflow CONTAMINANT_FILTER {
         ch_filter_stats = ch_filter_stats.mix(MAP_OTHER.out.stats.ifEmpty(null))
         MAP_OTHER.out.unmapped.set { other_cont_reads }
         QUANT_OTHER( MAP_OTHER.out.contaminants )
+        ch_contaminants_other = ch_contaminants_other.mix(QUANT_OTHER.out.contaminants_counts)
     }
 
     FILTER_STATS ( other_cont_reads, ch_filter_stats.collect() )
 
+    if (params.rrna) {
+        SUMMARIZE_TRNA ('rRNA', ch_contaminants_rrna.collect(), params.rrna_annots )
+    }
+
     if (params.trna) {
-        SUMMARIZE_TRNA ('tRNA', ch_contaminants_trna.collect(), params.trna_annots )
+        SUMMARIZE_RRNA ('tRNA', ch_contaminants_trna.collect(), params.trna_annots )
+    }
+
+    if (params.cdna) {
+        SUMMARIZE_CDNA ('cDNA', ch_contaminants_cdna.collect(), params.cdna_annots )
+    }
+
+    if (params.ncrna) {
+        SUMMARIZE_NCRNA ('ncRNA', ch_contaminants_ncrna.collect(), params.ncrna_annots )
+    }
+
+    if (params.pirna) {
+        SUMMARIZE_PIRNA ('piRNA', ch_contaminants_pirna.collect(), params.pirna_annots )
+    }
+
+    if (other) {
+        SUMMARIZE_OTHER ('other', ch_contaminants_other.collect(), params.other_annots )
     }
 
     emit:
