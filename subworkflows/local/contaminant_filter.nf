@@ -156,11 +156,11 @@ workflow CONTAMINANT_FILTER {
     FILTER_STATS ( other_cont_reads, ch_filter_stats.collect() )
 
     if (params.rrna) {
-        SUMMARIZE_TRNA ('rRNA', ch_contaminants_rrna.collect(), params.rrna_annots )
+        SUMMARIZE_RRNA ('rRNA', ch_contaminants_rrna.collect(), params.rrna_annots )
     }
 
     if (params.trna) {
-        SUMMARIZE_RRNA ('tRNA', ch_contaminants_trna.collect(), params.trna_annots )
+        SUMMARIZE_TRNA ('tRNA', ch_contaminants_trna.collect(), params.trna_annots )
     }
 
     if (params.cdna) {
