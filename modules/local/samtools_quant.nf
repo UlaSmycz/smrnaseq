@@ -8,7 +8,8 @@ process SAMTOOLS_QUANT_CONTAMINANTS {
     tuple val(meta), val(contaminant_type), path(contaminants)
 
     output:
-    tuple val(meta.id), path('*.tsv'), emit: contaminants_counts
+    path('*.tsv'), emit: contaminants_counts
+
     
     script:
     def args = task.ext.args ?: ""
