@@ -30,7 +30,7 @@ process SUMMARIZE_QUANT_CONTAMINATION {
         current_counts = pd.read_csv(file_name, delimiter='\t', index_col=0, header=None)
         if ii==0:
             counts.index = current_counts.index
-        sample_name = file_name.split('.')[0]
+        sample_name = file_name.replace('.' + "${contaminant_type}" + '.tsv', '')
         counts[sample_name] = current_counts[2]
         ii+=1
     
