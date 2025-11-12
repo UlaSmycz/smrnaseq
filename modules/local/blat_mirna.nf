@@ -1,5 +1,5 @@
 process BLAT_MIRNA {
-    tag "$fasta"
+    // tag "$fasta"
     label 'process_medium'
 
     conda 'bioconda::blat=36'
